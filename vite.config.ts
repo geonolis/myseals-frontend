@@ -154,6 +154,10 @@ const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(
 
 export default defineConfig({
   plugins,
+  define: {
+    // Enable preview/demo mode so the UI is visible without Auth0 configured
+    'import.meta.env.VITE_PREVIEW_MODE': JSON.stringify('true'),
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
