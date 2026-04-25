@@ -20,13 +20,7 @@ import { Plus, Users as UsersIcon, RefreshCw, Search, CheckCircle2, XCircle } fr
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
-const MOCK_USERS = [
-  { userId: "1", fullName: "Admin User", email: "admin@customs.pt", roleName: "HQ_ADMIN", officeName: "Headquarters", isActive: true, createdAt: new Date(Date.now() - 7776000000).toISOString() },
-  { userId: "2", fullName: "Carlos Silva", email: "c.silva@customs.pt", roleName: "EMPLOYEE", officeName: "Lisbon Port Office", isActive: true, createdAt: new Date(Date.now() - 5184000000).toISOString() },
-  { userId: "3", fullName: "Ana Ferreira", email: "a.ferreira@customs.pt", roleName: "EMPLOYEE", officeName: "Lisbon Port Office", isActive: true, createdAt: new Date(Date.now() - 4320000000).toISOString() },
-  { userId: "4", fullName: "João Mendes", email: "j.mendes@customs.pt", roleName: "OFFICE_MANAGER", officeName: "Porto Office", isActive: true, createdAt: new Date(Date.now() - 2592000000).toISOString() },
-  { userId: "5", fullName: "Maria Santos", email: "m.santos@customs.pt", roleName: "EMPLOYEE", officeName: "Faro Office", isActive: false, createdAt: new Date(Date.now() - 1296000000).toISOString() },
-];
+// No mock data — all data comes from the live backend
 
 const ROLE_COLORS: Record<string, string> = {
   HQ_ADMIN: "bg-violet-100 text-violet-700",
@@ -63,11 +57,27 @@ export default function Users() {
   );
 
   const handleCreate = async () => {
-    if (!form.fullName || !form.email) { toast.error("Name and email are required"); return; }
+    // Validate required fields — officeId and roleId are @NotNull in the backend DTO
+    if (!form.fullName.trim()) { toast.error("Full name is required"); return; }
+    if (!form.email.trim()) { toast.error("Email is required"); return; }
+    if (!form.officeId) { toast.error("Please select an office"); return; }
+    if (!form.roleId) { toast.error("Please select a role"); return; }
+
     setSaving(true);
     try {
-      await usersApi.create(form);
-      toast.success(`User ${form.fullName} created`);
+      // Build payload — only send auth0UserId if the user filled it in;
+      // the backend auto-generates a placeholder UUID if omitted.
+      const payload: Record<string, unknown> = {
+        fullName: form.fullName.trim(),
+        email: form.email.trim(),
+        officeId: form.officeId,
+        roleId: form.roleId,
+      };
+      if (form.phoneNumber.trim()) payload.phoneNumber = form.phoneNumber.trim();
+      if (form.auth0UserId.trim()) payload.auth0UserId = form.auth0UserId.trim();
+
+      await usersApi.create(payload);
+      toast.success(`User "${form.fullName}" created successfully`);
       setShowCreate(false);
       setForm({ fullName: "", email: "", auth0UserId: "", officeId: "", roleId: "", phoneNumber: "" });
       load();
@@ -187,7 +197,7 @@ export default function Users() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Office</Label>
+                <Label>Office <span className="text-destructive">*</span></Label>
                 <Select value={form.officeId} onValueChange={(v) => setForm({ ...form, officeId: v })}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select..." /></SelectTrigger>
                   <SelectContent>
@@ -196,7 +206,7 @@ export default function Users() {
                 </Select>
               </div>
               <div>
-                <Label>Role</Label>
+                <Label>Role <span className="text-destructive">*</span></Label>
                 <Select value={form.roleId} onValueChange={(v) => setForm({ ...form, roleId: v })}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select..." /></SelectTrigger>
                   <SelectContent>
