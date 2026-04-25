@@ -29,7 +29,7 @@ const MOCK_USAGE = [
 ];
 
 export default function SealUsage() {
-  const [usage, setUsage] = useState<any[]>(MOCK_USAGE);
+  const [usage, setUsage] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -39,12 +39,12 @@ export default function SealUsage() {
 
   const load = () => {
     setLoading(true);
-    sealUsageApi.getAll().then((r) => { if (r.data?.length) setUsage(r.data); }).catch(() => {}).finally(() => setLoading(false));
+    sealUsageApi.getAll().then((r) => { setUsage(r.data ?? []); }).catch((err) => { toast.error(err.message ?? "Failed to load usage records"); }).finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
-    sealsApi.getAll({ status: "ASSIGNED" }).then((r) => { if (r.data?.length) setSeals(r.data); }).catch(() => {});
+    sealsApi.getAll({ status: "ASSIGNED" }).then((r) => { setSeals(r.data ?? []); }).catch(() => {});
   }, []);
 
   const filtered = usage.filter((u) =>

@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { sealsApi, sealBatchesApi, officesApi } from "@/lib/api";
-import { MOCK_SEALS, SEAL_STATUS_LABELS, formatDateTime } from "@/lib/utils";
+import { SEAL_STATUS_LABELS, formatDateTime } from "@/lib/utils";
 import type { Seal, SealStatus } from "@/lib/types";
 import { Plus, Search, Filter, RefreshCw, Tag } from "lucide-react";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 ];
 
 export default function Seals() {
-  const [seals, setSeals] = useState<any[]>(MOCK_SEALS);
+  const [seals, setSeals] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -56,15 +56,15 @@ export default function Seals() {
     setLoading(true);
     sealsApi
       .getAll()
-      .then((res) => { if (res.data?.length) setSeals(res.data); })
-      .catch(() => {})
+      .then((res) => { setSeals(res.data ?? []); })
+      .catch((err) => { toast.error(err.message ?? "Failed to load seals"); })
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     loadSeals();
-    sealBatchesApi.getAll().then((r) => { if (r.data?.length) setBatches(r.data); }).catch(() => {});
-    officesApi.getAll().then((r) => { if (r.data?.length) setOffices(r.data); }).catch(() => {});
+    sealBatchesApi.getAll().then((r) => { setBatches(r.data ?? []); }).catch(() => {});
+    officesApi.getAll().then((r) => { setOffices(r.data ?? []); }).catch(() => {});
   }, []);
 
   const filtered = seals.filter((s) => {
@@ -166,11 +166,18 @@ export default function Seals() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.length === 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="text-center py-12 text-muted-foreground">
+                        <RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin opacity-50" />
+                        <p className="text-sm">Loading seals...</p>
+                      </td>
+                    </tr>
+                  ) : filtered.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="text-center py-12 text-muted-foreground">
                         <Tag className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                        <p className="text-sm">No seals found</p>
+                        <p className="text-sm">{seals.length === 0 ? "No seals registered yet. Click \"Register Seal\" to add the first one." : "No seals match your search."}</p>
                       </td>
                     </tr>
                   ) : (

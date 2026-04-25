@@ -27,13 +27,13 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 export default function AuditLogs() {
-  const [logs, setLogs] = useState<any[]>(MOCK_LOGS);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
   const load = () => {
     setLoading(true);
-    auditLogsApi.getAll().then((r) => { if (r.data?.length) setLogs(r.data); }).catch(() => {}).finally(() => setLoading(false));
+    auditLogsApi.getAll().then((r) => { setLogs(r.data ?? []); }).catch((err) => { console.error("Audit logs error:", err); }).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);

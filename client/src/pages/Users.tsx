@@ -35,7 +35,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export default function Users() {
-  const [users, setUsers] = useState<any[]>(MOCK_USERS);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -46,13 +46,13 @@ export default function Users() {
 
   const load = () => {
     setLoading(true);
-    usersApi.getAll().then((r) => { if (r.data?.length) setUsers(r.data); }).catch(() => {}).finally(() => setLoading(false));
+    usersApi.getAll().then((r) => { setUsers(r.data ?? []); }).catch((err) => { toast.error(err.message ?? "Failed to load users"); }).finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
-    officesApi.getAll().then((r) => { if (r.data?.length) setOffices(r.data); }).catch(() => {});
-    rolesApi.getAll().then((r) => { if (r.data?.length) setRoles(r.data); }).catch(() => {});
+    officesApi.getAll().then((r) => { setOffices(r.data ?? []); }).catch(() => {});
+    rolesApi.getAll().then((r) => { setRoles(r.data ?? []); }).catch(() => {});
   }, []);
 
   const filtered = users.filter((u) =>

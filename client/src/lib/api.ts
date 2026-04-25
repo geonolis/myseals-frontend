@@ -17,7 +17,8 @@ export const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000,
+  // Render free tier can take up to 60s to wake from sleep — generous timeout
+  timeout: 70000,
 });
 
 // Token setter — called from Auth0 hook after login

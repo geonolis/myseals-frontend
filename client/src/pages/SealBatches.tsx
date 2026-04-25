@@ -28,7 +28,7 @@ const MOCK_BATCHES = [
 ];
 
 export default function SealBatches() {
-  const [batches, setBatches] = useState<any[]>(MOCK_BATCHES);
+  const [batches, setBatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -45,8 +45,8 @@ export default function SealBatches() {
   const loadBatches = () => {
     setLoading(true);
     sealBatchesApi.getAll()
-      .then((r) => { if (r.data?.length) setBatches(r.data); })
-      .catch(() => {})
+      .then((r) => { setBatches(r.data ?? []); })
+      .catch((err) => { toast.error(err.message ?? "Failed to load batches"); })
       .finally(() => setLoading(false));
   };
 

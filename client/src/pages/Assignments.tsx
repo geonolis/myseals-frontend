@@ -28,7 +28,7 @@ const MOCK_ASSIGNMENTS = [
 ];
 
 export default function Assignments() {
-  const [assignments, setAssignments] = useState<any[]>(MOCK_ASSIGNMENTS);
+  const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -40,14 +40,14 @@ export default function Assignments() {
 
   const load = () => {
     setLoading(true);
-    assignmentsApi.getAll().then((r) => { if (r.data?.length) setAssignments(r.data); }).catch(() => {}).finally(() => setLoading(false));
+    assignmentsApi.getAll().then((r) => { setAssignments(r.data ?? []); }).catch((err) => { toast.error(err.message ?? "Failed to load assignments"); }).finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
-    sealsApi.getAll({ status: "IN_STOCK" }).then((r) => { if (r.data?.length) setSeals(r.data); }).catch(() => {});
-    usersApi.getAll().then((r) => { if (r.data?.length) setUsers(r.data); }).catch(() => {});
-    officesApi.getAll().then((r) => { if (r.data?.length) setOffices(r.data); }).catch(() => {});
+    sealsApi.getAll({ status: "IN_STOCK" }).then((r) => { setSeals(r.data ?? []); }).catch(() => {});
+    usersApi.getAll().then((r) => { setUsers(r.data ?? []); }).catch(() => {});
+    officesApi.getAll().then((r) => { setOffices(r.data ?? []); }).catch(() => {});
   }, []);
 
   const filtered = assignments.filter((a) =>

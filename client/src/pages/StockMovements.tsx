@@ -31,7 +31,7 @@ const MOCK_MOVEMENTS = [
 const MOVEMENT_TYPES: MovementType[] = ["RECEIVED","TRANSFER_OUT","TRANSFER_IN","ASSIGNED_TO_USER","RETURNED_FROM_USER","USED","LOST","DAMAGED","CANCELLED"];
 
 export default function StockMovements() {
-  const [movements, setMovements] = useState<any[]>(MOCK_MOVEMENTS);
+  const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -43,14 +43,14 @@ export default function StockMovements() {
 
   const load = () => {
     setLoading(true);
-    stockMovementsApi.getAll().then((r) => { if (r.data?.length) setMovements(r.data); }).catch(() => {}).finally(() => setLoading(false));
+    stockMovementsApi.getAll().then((r) => { setMovements(r.data ?? []); }).catch((err) => { toast.error(err.message ?? "Failed to load movements"); }).finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
-    sealsApi.getAll().then((r) => { if (r.data?.length) setSeals(r.data); }).catch(() => {});
-    officesApi.getAll().then((r) => { if (r.data?.length) setOffices(r.data); }).catch(() => {});
-    usersApi.getAll().then((r) => { if (r.data?.length) setUsers(r.data); }).catch(() => {});
+    sealsApi.getAll().then((r) => { setSeals(r.data ?? []); }).catch(() => {});
+    officesApi.getAll().then((r) => { setOffices(r.data ?? []); }).catch(() => {});
+    usersApi.getAll().then((r) => { setUsers(r.data ?? []); }).catch(() => {});
   }, []);
 
   const filtered = movements.filter((m) =>

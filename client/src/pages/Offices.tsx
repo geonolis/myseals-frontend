@@ -27,7 +27,7 @@ const MOCK_OFFICES = [
 ];
 
 export default function Offices() {
-  const [offices, setOffices] = useState<any[]>(MOCK_OFFICES);
+  const [offices, setOffices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
@@ -36,7 +36,7 @@ export default function Offices() {
 
   const load = () => {
     setLoading(true);
-    officesApi.getAll().then((r) => { if (r.data?.length) setOffices(r.data); }).catch(() => {}).finally(() => setLoading(false));
+    officesApi.getAll().then((r) => { setOffices(r.data ?? []); }).catch((err) => { toast.error(err.message ?? "Failed to load offices"); }).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
